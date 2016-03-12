@@ -83,7 +83,7 @@
 <td colspan="5" align="center">
 <i>T</i> =
 &nbsp;
-<input type="text" size="8" name="T" value="15.7" />
+<input type="text" size="8" name="T" value="15.7" data-min="0" data-max="100" />
 </td>
 </tr>
 <tr>
@@ -107,6 +107,11 @@ var $inputRange = $("<input type='range'>")
 $("input[type='text']").after($inputRange)
         .each(function(){
             $(this).next().val(parseFloat(this.value));
+            var $this = $(this), $range = $(this).next();
+            $range.val(parseFloat(this.value));
+            var min = $this.data("min"), max = $this.data("max");
+            if (typeof min !== 'undefined') $range.attr("min", min);
+            if (typeof max !== 'undefined') $range.attr("max", max);
         })
         .on('input', function(){
             $(this).next().val(parseFloat(this.value));
