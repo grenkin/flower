@@ -89,11 +89,22 @@
 <td>
 &nbsp;
 </td>
+<td colspan="2">
+<input type="range" min="-2" max="2" step="0.1" value="0.5" oninput="javascript:k.value=this.value; clickPlot();" />
+</td>
+</tr>
+<tr>
 <td>
 &nbsp;&nbsp;&nbsp;&nbsp;<i>l</i> =
 </td>
 <td>
 <input type="text" size="8" name="l" value="0.5" />
+</td>
+<td>
+&nbsp;
+</td>
+<td colspan="2">
+<input type="range" min="-2" max="2" step="0.1" value="0.5" oninput="javascript:l.value=this.value; clickPlot();" />
 </td>
 </tr>
 <tr>
@@ -119,12 +130,22 @@ var k = parseFloat(frm.k.value);
 var l = parseFloat(frm.l.value);
 var T = parseFloat(frm.T.value);          
 
-a1 = a2 = 2 - 1.0/k;
-b1 = b2 = 1.0/k - 1;
-x0 = 1 + k * (l - 1);
-y0 = 0;
-dx0 = 0;
-dy0 = (1 - l) * (1 - k);
+if (k == 0) {
+  a1 = a2 = 1;
+  b1 = b2 = 0;
+  x0 = 1;
+  y0 = 0;
+  dx0 = 0;
+  dy0 = 1;
+}
+else {
+  a1 = a2 = 2 - 1.0/k;
+  b1 = b2 = 1.0/k - 1;
+  x0 = 1 + k * (l - 1);
+  y0 = 0;
+  dx0 = 0;
+  dy0 = (1 - l) * (1 - k);
+}
 
 frm.a1.value = a1;
 frm.a2.value = a2;
