@@ -1,0 +1,233 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" >
+<title>Цветок: любит / не любит</title>
+    <script language="javascript" type="text/javascript" src="./flot/jquery.js"></script>
+    <script language="javascript" type="text/javascript" src="./flot/jquery.flot.js"></script>
+    <script language="javascript" type="text/javascript" src="./numericjs/numeric-1.2.6.js"></script>
+</head>
+<body onload="clickPlot();">
+
+<form name="frm">
+<table align="center" border="0" cellspacing="0" cellpadding="5">
+<tr>
+<td>
+<i>a</i><sub>1</sub> =
+</td>
+<td>
+<input type="text" size="8" name="a1" disabled />
+</td>
+<td width="10">
+&nbsp;
+</td>
+<td>
+<i>x</i><sub>0</sub> =
+</td>
+<td>
+<input type="text" size="8" name="x0" disabled />
+</td>
+</tr>
+<tr>
+<td>
+<i>a</i><sub>2</sub> =
+</td>
+<td>
+<input type="text" size="8" name="a2" disabled />
+</td>
+<td>
+&nbsp;
+</td>
+<td>
+<i>y</i><sub>0</sub> =
+</td>
+<td>
+<input type="text" size="8" name="y0" disabled />
+</td>
+</tr>
+<tr>
+<td>
+<i>b</i><sub>1</sub> =
+</td>
+<td>
+<input type="text" size="8" name="b1" disabled />
+</td>
+<td>
+&nbsp;
+</td>
+<td>
+<i>dx</i><sub>0</sub> =
+</td>
+<td>
+<input type="text" size="8" name="dx0" disabled />
+</td>
+</tr>
+<tr>
+<td>
+<i>b</i><sub>2</sub> =
+</td>
+<td>
+<input type="text" size="8" name="b2" disabled />
+</td>
+<td>
+&nbsp;
+</td>
+<td>
+<i>dy</i><sub>0</sub> =
+</td>
+<td>
+<input type="text" size="8" name="dy0" disabled />
+</td>
+</tr>
+<tr>
+<td>
+&nbsp;&nbsp;<i>k</i> =
+</td>
+<td>
+<input type="text" size="8" name="k" disabled />
+</td>
+<td>
+&nbsp;
+</td>
+<td>
+&nbsp;&nbsp;&nbsp;&nbsp;<i>l</i> =
+</td>
+<td>
+<input type="text" size="8" name="l" disabled />
+</td>
+</tr>
+<tr>
+<td colspan="5" align="center">
+<i>T</i> =
+&nbsp;
+<input type="text" size="8" name="T" value="300" />
+</td>
+</tr>
+<tr>
+<td colspan="5">
+<hr>
+</td>
+</tr>
+</table>
+
+<table align="center" border="0" cellspacing="0" cellpadding="5">
+<tr>
+<td>
+<b>М</b>
+</td>
+<td>
+&nbsp;&nbsp;&nbsp;
+</td>
+<td>
+день &nbsp;
+<input type="text" size="2" name="M_day" value="1" />
+</td>
+<td>
+&nbsp;
+</td>
+<td>
+месяц &nbsp;
+<input type="text" size="2" name="M_month" value="1" />
+</td>
+</tr>
+<tr>
+<td>
+<b>Ж</b>
+</td>
+<td>
+&nbsp;&nbsp;&nbsp;
+</td>
+<td>
+день &nbsp;
+<input type="text" size="2" name="W_day" value="31" />
+</td>
+<td>
+&nbsp;
+</td>
+<td>
+месяц &nbsp;
+<input type="text" size="2" name="W_month" value="12" />
+</td>
+</tr>
+<tr>
+<td colspan="5" align="center" style="padding: 15px">
+<input type="button" value="Нарисовать цветок" onClick="clickPlot();" />
+</td>
+</tr>
+</table>
+</form>
+
+<script type="text/javascript">
+
+function clickPlot() {
+
+var Mday = parseInt(frm.M_day.value);
+var Mmonth = parseInt(frm.M_month.value);
+var Wday = parseInt(frm.W_day.value);
+var Wmonth = parseInt(frm.W_month.value);
+
+var A = Math.abs(Mday - Wday);
+var B = Math.abs(Mmonth - Wmonth);
+var rel = A < B ? A / B : B / A;
+
+var k = rel;
+var l = 1/k - 1;
+var T = parseFloat(frm.T.value);          
+
+if (k == 0) {
+  a1 = a2 = 1;
+  b1 = b2 = 0;
+  x0 = 1;
+  y0 = 0;
+  dx0 = 0;
+  dy0 = 1;
+}
+else {
+  a1 = a2 = 2 - 1.0/k;
+  b1 = b2 = 1.0/k - 1;
+  x0 = 1 + k * (l - 1);
+  y0 = 0;
+  dx0 = 0;
+  dy0 = (1 - l) * (1 - k);
+}
+
+frm.k.value = k;
+frm.l.value = l;
+frm.a1.value = a1;
+frm.a2.value = a2;
+frm.b1.value = b1;
+frm.b2.value = b2;
+frm.x0.value = x0;
+frm.y0.value = y0;
+frm.dx0.value = dx0;
+frm.dy0.value = dy0;
+
+f = function(t, x) {
+  return [-a1*x[2] - b1*x[1],
+          x[0],
+          a2*x[0] - b2*x[3],
+          x[2]];
+}
+
+sol = numeric.dopri(0, T, [dx0, x0, dy0, y0], f, 1e-7, 10000);
+y = numeric.transpose(sol.y);
+
+  $(function() {
+    $.plot("#placeholder", [{data: numeric.transpose([y[1], y[3]]), color: "#dbd056"}]);
+  });
+
+} //function
+
+</script>
+
+<center>
+<div id="placeholder" style="width:500px; height:500px;"></div>
+</center>
+
+<br>
+
+<p align="center"><font face="Arial" size="3"><a href="index.html">На главную</a></font></p>
+<p align="center"><font face="Arial" size="3"><a href="about.html" target="_blank">Что это такое?</a></font></p>
+
+</body>
+</html>
